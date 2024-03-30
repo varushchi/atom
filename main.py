@@ -1,25 +1,18 @@
 from fastapi import FastAPI, Request, HTTPException
 import asyncio
+from robot import robot
 
 app = FastAPI()
 
 robot_task = None
 
 @app.post("/start_robot")
-async def start_robot(request: Request):
+async def start_robot(request: Request, startpoint: int):
     global robot_task
-
     if robot_task is not None:
         raise HTTPException(status_code=400, detail="Робот уже запущен")
 
-    async def robot():
-        i = 0
-        while True:
-            print(i)
-            i += 1
-            await asyncio.sleep(1)
-
-    robot_task = asyncio.create_task(robot())
+    robot_task = asyncio.create_task(robot(startpoint))
     return {"message": "Робот запущен"}
 
 @app.post("/stop_robot")
@@ -35,6 +28,5 @@ async def stop_robot(request: Request):
 
 
 if __name__ == "__main__":
-    print("Starting FastAPI server...")
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
